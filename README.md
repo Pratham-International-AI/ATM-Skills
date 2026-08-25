@@ -183,12 +183,6 @@ carefully, because the new subject hasn't been through our evaluations.
 profile's "Cognitive framework" section and the generator will use them. The standalone
 classifier skill, though, is Bloom's-only.
 
-**Who grades the answers?** This kit is for authoring. It generates questions with marking
-schemes so an examiner, human or automated, can grade against them. Grading and student
-feedback live in the wider ATM project as prompt-based services (see the project's
-`PROMPTS.md`).
-
-**How do I know the output is good?** For CBSE Class 10 we've run our own evaluations and
-stand by it. For your own profile, start small: generate 5 or 10 questions, have a subject
-examiner check them against your rubric, tighten the profile wherever the AI drifted, and
-repeat. Treat the profile the way you'd treat guidelines for a new human item-writer.
+**Who grades the answers?** This kit is for authoring only; it does not grade student
+answers or write feedback. Every question it generates comes with a marking scheme (the
+value points), so an examiner, human or automated, has everything needed to grade against.
