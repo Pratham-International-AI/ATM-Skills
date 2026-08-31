@@ -79,7 +79,7 @@ the level of detail that works well.
 
 The skills already enforce universal craft rules (MCQ options must not give away the answer,
 fill-in-the-blank must blank whole terms, one concept per question, difficulty must match
-marks — see `skills/automatic-item-generation/references/item-writing-craft.md`). Here, add
+marks — see `automatic-item-generation/references/item-writing-craft.md`). Here, add
 only what is **specific to your curriculum**, e.g.:
 
 - Required or forbidden question styles:
@@ -97,3 +97,14 @@ ticks off. Define how many value points each question needs and how they're stru
 
 - **Value point style rules:** (max words per point, whether formulas/units are required, whether alternative phrasings are allowed, any closing catch-all phrase like "(Any other relevant point to be accepted)")
 - **Mark splits, if any:** (e.g. content vs. expression vs. accuracy marks, by mark value — these determine how value points are annotated so an examiner can mark against them)
+
+## 9. Worked examples *(optional, strongly recommended)*
+
+*Real examples anchor the AI better than rules alone.*
+
+- **Model questions:** 3–6 questions (with their value points) that your examiners would
+  consider excellent, covering your main formats and subjects. For each, add a line on why
+  it's good. See `cbse-class10/worked-examples.md` for the level of detail that works.
+- **Cognitive-level examples:** 1–2 example questions per level of your cognitive
+  framework, each with its correct label and a one-line reason. Add these especially if
+  default Bloom's classifications don't match your curriculum's conventions.

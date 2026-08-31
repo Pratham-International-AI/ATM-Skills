@@ -24,10 +24,10 @@ the curriculum's identity, audience, subjects, difficulty levels, item quality r
 marking rubric. Resolve it in this order:
 
 1. A profile path or pasted profile content the user gives you.
-2. If the user names **CBSE Class 10** (or gives no curriculum but the CBSE profile is
-   available), use the shipped example: look for `curriculum-profiles/cbse-class10/` next to
-   the `skills/` folder, inside this skill's folder, or at the project root.
-3. Otherwise **stop and ask** for a profile (point them at `curriculum-profiles/TEMPLATE.md`).
+2. If the user names **CBSE Class 10** (or gives no curriculum), use the bundled example at
+   `curriculum-profiles/cbse-class10/` inside this skill's folder.
+3. Otherwise **stop and ask** for a profile (point them at the bundled
+   `curriculum-profiles/TEMPLATE.md`).
    Never substitute your general knowledge of a curriculum for its profile — the profile is
    the contract the output is judged against.
 
@@ -59,7 +59,9 @@ supplied source.
 
 1. **Resolve and read the curriculum profile.** Read `profile.md` (or the single profile
    file) fully, then every file it links that applies to this request: the matching subject
-   rules and the marking-scheme/value-point rubric.
+   rules and the marking-scheme/value-point rubric. If the profile includes worked examples
+   (the CBSE example has `worked-examples.md`), read them too — model outputs calibrate item
+   style and value-point granularity better than rules alone.
 
 2. **Extract source text.**
    - `.pdf`, `.txt`, `.md`: read directly (most environments can read these natively).
@@ -85,9 +87,9 @@ supplied source.
    - MCQs: exactly 4 options, correct `answer` index, options are stylistically symmetric (re-read the MCQ rules — this is the most commonly violated rule).
    - Fact-heavy subjects: spot-check every stated fact, formula, and equation for correctness before finalizing.
    - Re-scan the profile's subject rules top to bottom and confirm each rule is honored.
-   - Output matches the schema in `references/output-schemas.md` exactly — correct top-level key, no extra/missing fields.
+   - Every item carries all the information `references/output-schemas.md` defines for its format (question, options/answer where applicable, marks, blooms_level, value_points) — and if returning JSON, the output matches the schema exactly: correct top-level key, no extra/missing fields.
 
-6. **Return the response envelope** from `references/output-schemas.md` — `status`, `message`, `no_questions`, and the single array keyed by `question_format`.
+6. **Deliver in the format the user needs.** Default to the JSON response envelope from `references/output-schemas.md` (`status`, `message`, `no_questions`, and the single array keyed by `question_format`) whenever the output feeds a pipeline or no format is specified. But the schema defines the required *information*, not the only permitted container: if the user asks for a spreadsheet, a Word/markdown question paper, or wants questions appended to an existing file, produce that instead — every item still carrying the same fields.
 
 ## Common failure modes to avoid
 

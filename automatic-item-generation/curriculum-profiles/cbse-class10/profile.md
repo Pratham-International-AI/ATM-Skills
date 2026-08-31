@@ -62,3 +62,8 @@ in the item-generation skill.
 
 Value-point counts, structure, mark splits, and answer word limits by subject and marks:
 [`value-points.md`](value-points.md).
+
+## 9. Worked examples
+
+Model questions for each format, with value points and notes on why each one passes this
+profile's rules: [`worked-examples.md`](worked-examples.md).

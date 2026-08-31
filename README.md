@@ -22,25 +22,31 @@ review the results yourself before putting them in front of students.
 ```
 atm-skills/
   README.md                          ← you are here
-  curriculum-profiles/               ← the "describe your curriculum" part
-    TEMPLATE.md                      ← blank profile to copy and fill in
-    cbse-class10/                    ← the worked example
-      profile.md                     ← start here: identity, audience, subjects
-      science-rules.md               ← how CBSE Science questions must be written
-      english-rules.md               ← how CBSE English Literature questions must be written
-      value-points.md                ← marking-scheme structure by subject and marks
-  skills/                            ← the "automation" part
-    automatic-item-generation/       ← Skill 1: question generator
-      SKILL.md
-      references/
-        item-writing-craft.md        ← question-quality rules that apply to any curriculum
-        blooms-taxonomy.md
-        output-schemas.md
-    blooms-taxonomy-classifier/      ← Skill 2: thinking-level tagger
-      SKILL.md
-      references/
-        blooms-taxonomy.md
+  LICENSE                            ← Apache 2.0
+  NOTICE
+  automatic-item-generation/         ← Skill 1: question generator
+    SKILL.md
+    curriculum-profiles/             ← the "describe your curriculum" part
+      TEMPLATE.md                    ← blank profile to copy and fill in
+      cbse-class10/                  ← the worked example
+        profile.md                   ← start here: identity, audience, subjects
+        science-rules.md             ← how CBSE Science questions must be written
+        english-rules.md             ← how CBSE English Literature questions must be written
+        value-points.md              ← marking-scheme structure by subject and marks
+        worked-examples.md           ← model questions that pass every rule
+    references/
+      item-writing-craft.md          ← question-quality rules that apply to any curriculum
+      blooms-taxonomy.md
+      output-schemas.md
+  blooms-taxonomy-classifier/        ← Skill 2: thinking-level tagger
+    SKILL.md
+    references/
+      blooms-taxonomy.md
+      level-examples.md              ← classified example questions per level
 ```
+
+The curriculum profiles live inside the generation skill on purpose: installing that one
+folder brings the template, the CBSE example, and its worked examples along with it.
 
 A skill is a set of instructions the AI reads when it recognizes a matching task. The
 skills hold everything that is true for any curriculum (for example, no MCQ option should
@@ -52,8 +58,8 @@ yours (for example, a 3-mark English answer is marked 2 for content plus 1 for e
 ### Step 1, done once per curriculum: write a curriculum profile
 
 Before the AI can generate questions for your curriculum, you have to tell it the rules.
-Copy `curriculum-profiles/TEMPLATE.md`, fill in its eight sections, and save it. The
-sections ask for things an examiner already knows:
+Copy `automatic-item-generation/curriculum-profiles/TEMPLATE.md`, work through its
+sections, and save it. The sections ask for things an examiner already knows:
 
 | Profile section | What you provide |
 |---|---|
@@ -65,9 +71,10 @@ sections ask for things an examiner already knows:
 | Formats and marks | Which question types and mark values you use |
 | Item quality rubric | Your curriculum's do's and don'ts for questions |
 | Marking scheme rubric | How many marking points per question, and their structure |
+| Worked examples | A few model questions your examiners consider excellent (optional, but they anchor the AI better than rules alone) |
 
-If a section is hard to fill, open the matching file in `curriculum-profiles/cbse-class10/`
-and copy its shape. A profile doesn't need to be complete on day one. Treat it as a living
+If a section is hard to fill, open the matching file in the `cbse-class10/` folder next to
+the template and copy its shape. A profile doesn't need to be complete on day one. Treat it as a living
 document: whenever the AI makes a mistake your examiners wouldn't, add a rule.
 
 Using CBSE Class 10? Skip this step. The included profile is ready to use.
@@ -88,6 +95,8 @@ the work. Some example requests:
 
 > "Tag every question in `question-bank.json` with its Bloom's level."
 
+> "Add a Bloom's level column to `question-bank.xlsx`."
+
 > "Audit this question paper. What percentage is just Remembering?"
 
 Every generated question comes with value points: the marking-scheme bullets an examiner
@@ -99,8 +108,9 @@ ticks off when grading, structured the way your profile's marking rubric says.
 
 Give it your curriculum profile, the subject, a chapter (PDF, Word, text, or pasted
 content), the question format, marks per question, difficulty, and the Bloom's levels to
-target. It returns exactly the number of questions you asked for, each with value points,
-in a consistent machine-readable format so the results can also feed into other tools.
+target. It returns exactly the number of questions you asked for, each with value points.
+By default the output is a machine-readable format other tools can consume, but ask for a
+spreadsheet or a printable question paper and you'll get that instead.
 
 Some quality rules are built into the skill itself and apply no matter the curriculum:
 questions come only from the chapter you supplied (no invented facts), each question tests
@@ -113,29 +123,39 @@ hasn't been given.
 
 ### Bloom's taxonomy classifier
 
-Give it a question, or a whole JSON question bank, and it labels each question with one of
-the six Bloom's levels plus a confidence score and a one-line reason. It judges the actual
-thinking a question demands rather than trigger words; "explain" can be recall or analysis
-depending on the question.
+Give it a question, or a whole question bank in whatever format you keep it (JSON, CSV, a
+spreadsheet, or questions pasted into the chat), and it labels each question with one of
+the six Bloom's levels plus a confidence score and a one-line reason. For files, it hands
+back the same file with the levels filled in, for example a new Bloom's column added to
+your spreadsheet. It judges the actual thinking a question demands rather than trigger
+words; "explain" can be recall or analysis depending on the question.
 
 Bloom's Taxonomy isn't tied to any curriculum, so this skill works without a profile.
 
 ## Setting it up
 
-### In Claude Code
+### Quick install (recommended)
 
-Copy the skill folders into your skills directory, and keep `curriculum-profiles/` in your
-project so the AI can read it:
+```bash
+npx skills add <github-org>/atm-skills
+```
+
+Replace `<github-org>` with the GitHub account this repo lives under. This installs both
+skills into agents that support the skills format (Claude Code, Codex, and others), and the
+curriculum profiles come along automatically because they sit inside the generation skill.
+
+### In Claude Code, manually
+
+Copy the skill folders into your skills directory:
 
 ```bash
 # project-scoped (this project only)
-cp -r skills/automatic-item-generation  /path/to/your/project/.claude/skills/
-cp -r skills/blooms-taxonomy-classifier /path/to/your/project/.claude/skills/
-cp -r curriculum-profiles               /path/to/your/project/
+cp -r automatic-item-generation  /path/to/your/project/.claude/skills/
+cp -r blooms-taxonomy-classifier /path/to/your/project/.claude/skills/
 
 # or personal (all projects)
-cp -r skills/automatic-item-generation  ~/.claude/skills/
-cp -r skills/blooms-taxonomy-classifier ~/.claude/skills/
+cp -r automatic-item-generation  ~/.claude/skills/
+cp -r blooms-taxonomy-classifier ~/.claude/skills/
 ```
 
 Claude Code finds the skills automatically. Mention your profile (or "CBSE Class 10") in
@@ -143,15 +163,11 @@ your request and it takes it from there.
 
 ### In Claude.ai (Skills)
 
-1. Copy the `curriculum-profiles/` folder into the skill folder, so the profile travels
-   with the skill.
-2. Zip the skill folder so `SKILL.md` sits at the zip root, with `references/` and
-   `curriculum-profiles/` alongside it.
-3. Upload the zip under Settings, then Skills.
+Zip a skill folder so `SKILL.md` sits at the zip root, then upload the zip under Settings,
+then Skills. For the generation skill, `references/` and `curriculum-profiles/` travel
+inside the folder, so one zip carries everything.
 
 ### In ChatGPT (Custom GPT or Project)
-
-ChatGPT has no auto-invoked skills, but the same content works:
 
 - Custom GPT: paste the body of `SKILL.md` (everything below the `---` frontmatter block)
   into the GPT's Instructions. Upload the `references/*.md` files and your curriculum
@@ -186,3 +202,7 @@ classifier skill, though, is Bloom's-only.
 **Who grades the answers?** This kit is for authoring only; it does not grade student
 answers or write feedback. Every question it generates comes with a marking scheme (the
 value points), so an examiner, human or automated, has everything needed to grade against.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

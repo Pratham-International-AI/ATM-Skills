@@ -1,5 +1,7 @@
 # Output Schemas
 
+This is the canonical output contract — use it verbatim when the results feed a pipeline or the requester doesn't ask for a particular format. If the user wants a different artifact (a spreadsheet, a printable question paper, rows appended to their existing file), produce that instead; these schemas then define the information every item must still carry, not the container.
+
 Every item, regardless of format, carries `blooms_level` (one of the six Bloom's Taxonomy labels — see `blooms-taxonomy.md`) and `marks` (positive integer).
 
 ## mcq_questions
