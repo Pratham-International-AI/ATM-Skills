@@ -3,9 +3,9 @@
 This kit teaches an AI assistant (Claude, ChatGPT, or any capable LLM) to do two jobs that
 normally need an experienced examiner:
 
-1. **Write exam questions** from a chapter: MCQs, fill-in-the-blanks, short answers, and
+1. **Write exam items** from a chapter: MCQs, fill-in-the-blanks, short answers, and
    long answers, each with a ready-to-use marking scheme.
-2. **Audit questions** across four measures: the thinking level they demand (Bloom's
+2. **Audit items** across four measures: the thinking level they demand (Bloom's
    Taxonomy), how hard they are to read, whether their vocabulary matches the chapter
    taught, and whether MCQ options are balanced.
 
@@ -14,7 +14,7 @@ rules in a document called a curriculum profile, and the AI follows those rules.
 profile for CBSE Class 10 (Science and English) is included as the worked example.
 
 **A note on quality.** The CBSE Class 10 profile is the configuration we have evaluated
-extensively, and we stand behind the questions it produces. Profiles you write for other
+extensively, and we stand behind the items it produces. Profiles you write for other
 curricula run through the same system, but the output is only as good as the profile, so
 review the results yourself before putting them in front of students.
 
@@ -24,27 +24,27 @@ review the results yourself before putting them in front of students.
 atm-skills/
   README.md                          ← you are here
   LICENSE                            ← Apache 2.0
-  automatic-item-generation/         ← Skill 1: question generator
+  automatic-item-generation/         ← Skill 1: item generator
     SKILL.md
     curriculum-profiles/             ← the "describe your curriculum" part
       TEMPLATE.md                    ← blank profile to copy and fill in
       cbse-class10/                  ← the worked example
         profile.md                   ← start here: identity, audience, subjects
-        science-rules.md             ← how CBSE Science questions must be written
-        english-rules.md             ← how CBSE English Literature questions must be written
+        science-rules.md             ← how CBSE Science items must be written
+        english-rules.md             ← how CBSE English Literature items must be written
         value-points.md              ← marking-scheme structure by subject and marks
-        worked-examples.md           ← model questions that pass every rule
+        worked-examples.md           ← model items that pass every rule
     references/
-      item-writing-craft.md          ← question-quality rules that apply to any curriculum
+      item-writing-craft.md          ← item-quality rules that apply to any curriculum
       blooms-taxonomy.md
       output-schemas.md
-  item-auditor/                      ← Skill 2: question auditor
+  item-auditor/                      ← Skill 2: item auditor
     SKILL.md
     scripts/
       audit.py                       ← measures reading load, fit, and option balance
     references/
       blooms-taxonomy.md
-      level-examples.md              ← classified example questions per level
+      level-examples.md              ← classified example items per level
       metrics.md                     ← what each measure means, and its bands
 ```
 
@@ -60,7 +60,7 @@ yours (for example, a 3-mark English answer is marked 2 for content plus 1 for e
 
 ### Step 1, done once per curriculum: write a curriculum profile
 
-Before the AI can generate questions for your curriculum, you have to tell it the rules.
+Before the AI can generate items for your curriculum, you have to tell it the rules.
 Copy `automatic-item-generation/curriculum-profiles/TEMPLATE.md`, work through its
 sections, and save it. The sections ask for things an examiner already knows:
 
@@ -71,10 +71,10 @@ sections, and save it. The sections ask for things an examiner already knows:
 | Subjects | What's in and out of scope per subject |
 | Cognitive framework | Bloom's Taxonomy (the default) or your own level system |
 | Difficulty levels | What Easy, Medium, and Hard mean in your context |
-| Formats and marks | Which question types and mark values you use |
-| Item quality rubric | Your curriculum's do's and don'ts for questions |
-| Marking scheme rubric | How many marking points per question, and their structure |
-| Worked examples | A few model questions your examiners consider excellent (optional, but they anchor the AI better than rules alone) |
+| Formats and marks | Which item types and mark values you use |
+| Item quality rubric | Your curriculum's do's and don'ts for items |
+| Marking scheme rubric | How many marking points per item, and their structure |
+| Worked examples | A few model items your examiners consider excellent (optional, but they anchor the AI better than rules alone) |
 
 If a section is hard to fill, open the matching file in the `cbse-class10/` folder next to
 the template and copy its shape. A profile doesn't need to be complete on day one. Treat it as a living
@@ -82,7 +82,7 @@ document: whenever the AI makes a mistake your examiners wouldn't, add a rule.
 
 Using CBSE Class 10? Skip this step. The included profile is ready to use.
 
-### Step 2, automated: generate and tag questions
+### Step 2, automated: generate and audit items
 
 Ask in plain language. The AI reads your profile, reads the chapter you give it, and does
 the work. Some example requests:
@@ -90,13 +90,13 @@ the work. Some example requests:
 > "Using the CBSE Class 10 profile, generate 5 MCQs (1 mark each) from this chapter PDF,
 > Medium difficulty, targeting Remembering and Understanding."
 
-> "Generate ten 3-mark short-answer questions for English from `flying-together.pdf`,
+> "Generate ten 3-mark short-answer items for English from `flying-together.pdf`,
 > with value points."
 
-> "Using my curriculum profile at `profiles/igcse-biology.md`, make a 20-question bank
+> "Using my curriculum profile at `profiles/igcse-biology.md`, make a 20-item bank
 > from chapter 4."
 
-> "Tag every question in `question-bank.json` with its Bloom's level."
+> "Tag every item in `question-bank.json` with its Bloom's level."
 
 > "Add a Bloom's level column to `question-bank.xlsx`."
 
@@ -106,7 +106,7 @@ the work. Some example requests:
 
 > "Check the MCQs in `paper.docx`. Are any of the distractors giveaways?"
 
-Every generated question comes with value points: the marking-scheme bullets an examiner
+Every generated item comes with value points: the marking-scheme bullets an examiner
 ticks off when grading, structured the way your profile's marking rubric says.
 
 ## The two skills
@@ -114,15 +114,15 @@ ticks off when grading, structured the way your profile's marking rubric says.
 ### Automatic item generation
 
 Give it your curriculum profile, the subject, a chapter (PDF, Word, text, or pasted
-content), the question format, marks per question, difficulty, and the Bloom's levels to
-target. It returns exactly the number of questions you asked for, each with value points.
+content), the item format, marks per item, difficulty, and the Bloom's levels to
+target. It returns exactly the number of items you asked for, each with value points.
 By default the output is a machine-readable format other tools can consume, but ask for a
 spreadsheet or a printable question paper and you'll get that instead.
 
 Some quality rules are built into the skill itself and apply no matter the curriculum:
-questions come only from the chapter you supplied (no invented facts), each question tests
-one concept, no two questions repeat the same idea, MCQ options are balanced so the correct
-answer doesn't stand out, and question depth matches the marks.
+items come only from the chapter you supplied (no invented facts), each item tests one
+concept, no two items repeat the same idea, MCQ options are balanced so the correct answer
+doesn't stand out, and item depth matches the marks.
 
 One behavior worth knowing about: if you name a curriculum it has no profile for, it stops
 and asks for one rather than quietly inventing rules. (Say nothing about curriculum at all
@@ -130,22 +130,24 @@ and it falls back to the bundled CBSE Class 10 example.)
 
 ### Item auditor
 
-Give it a question, or a whole question bank in whatever format you keep it (JSON, CSV, a
-spreadsheet, or questions pasted into the chat), and it measures four things:
+Give it an item, or a whole item bank in whatever format you keep it (JSON, CSV, a
+spreadsheet, or items pasted into the chat), and it measures four things:
 
 | Layer | What it tells you |
 |---|---|
-| Cognitive demand | The Bloom's level, with a confidence score and a one-line reason. It judges the actual thinking a question demands rather than trigger words; "explain" can be recall or analysis depending on the question. |
-| Language load | Word count, sentence complexity, vocabulary variety, and reading grade level, so you can catch a Class 6 question written in Class 10 English. |
-| Curriculum fit | How much of the question's vocabulary appears in the chapter you teach from. Needs you to supply the chapter; it asks once, and skips this measure if you'd rather not. |
-| Item quality | For MCQs with an answer key: whether the distractors are plausible, whether the options are too alike, and whether one option is a giveaway because it's conspicuously longer. |
+| Cognitive demand | The Bloom's level, with a confidence score and a one-line reason. It judges the actual thinking an item demands rather than trigger words; "explain" can be recall or analysis depending on the item. |
+| Language load | Word count, sentence complexity, vocabulary variety, and reading grade level, so you can catch a Class 6 item written in Class 10 English. |
+| Curriculum fit | How much of the item's vocabulary appears in the chapter you teach from. Needs you to supply the chapter; it asks once, and skips this measure if you'd rather not. |
+| Item quality | For MCQs with an answer key: whether the options work as good distractors, meaning plausible enough to tempt a student who hasn't understood, distinct from one another, and none given away by being conspicuously longer. Metrics for other item types are still to be added. |
 
 For files, it hands back a copy in the same format with the results filled in, for
 example new columns added to your spreadsheet. Your original is left untouched.
 
-The auditor measures, it doesn't grade. A question tagged "heavy read" is a more
-demanding question, which may be exactly what you intended. You get the numbers and what's
-typical for the grade; the judgment stays yours.
+The auditor measures, it doesn't grade. An item tagged "heavy read" is a more demanding
+item, which may be exactly what you intended. You get the numbers and what's typical for
+the grade; the judgment stays yours. Item quality is the exception: a distractor nobody
+would pick, or an answer given away by its length, is a fault rather than a choice, so
+that layer does tell you when the options aren't working.
 
 The three measured layers run through a small Python script bundled with the skill. It
 uses only the standard library, so there is nothing to install. If you happen to have
@@ -236,7 +238,7 @@ only the cognitive-demand layer is Bloom's-specific; language load, curriculum f
 item quality don't depend on a cognitive framework at all, so you still get those three.
 
 **Who grades the answers?** This kit is for authoring only; it does not grade student
-answers or write feedback. Every question it generates comes with a marking scheme (the
+answers or write feedback. Every item it generates comes with a marking scheme (the
 value points), so an examiner, human or automated, has everything needed to grade against.
 
 ## License

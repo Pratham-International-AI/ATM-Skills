@@ -293,7 +293,7 @@ def language_load(text: str, grade: Optional[int]) -> dict:
     if n == 0:
         # Without words there is nothing to measure, and a "0 words / Light read" bucket
         # would read as a finding rather than as missing input.
-        return {"skipped": "No question text to measure."}
+        return {"skipped": "No item text to measure."}
     load_label, load_col = _band(BANDS["reading_load"], n)
     score, cx_label = sentence_complexity(text)
     ttr = type_token_ratio(text)
@@ -349,7 +349,7 @@ def curriculum_fit(text: str, material: str) -> dict:
     match = sum(1 for w in lem if w in ref) / len(lem)
     m_label, m_col = _band(BANDS["match"], match)
     bucket, bcol = {G: ("In chapter", G), N: ("Mixed", N), A: ("Beyond chapter", A)}[m_col]
-    note = "share of the question's words found in the chapter supplied"
+    note = "share of the item's words found in the chapter supplied"
     truncated = len(material) > MATERIAL_MAX_CHARS
     if truncated:
         note += (f" - only the first {MATERIAL_MAX_CHARS:,} characters were compared, "

@@ -1,11 +1,11 @@
 ---
 name: item-auditor
-description: Audit assessment/exam questions across four measurement layers - cognitive demand (Bloom's Taxonomy level with confidence and reasoning), language load (reading level, sentence complexity, vocabulary variety), curriculum fit (vocabulary overlap with the chapter taught), and item quality (MCQ distractor plausibility, option similarity, longest-option giveaway). Handles a single question or a whole question bank in any format (JSON, CSV, spreadsheet, markdown, or pasted text). Use when asked to tag, classify, audit, measure, or report on exam/quiz questions - their thinking level, readability, curriculum alignment, or option balance.
+description: Audit assessment/exam items (questions) across four measurement layers - cognitive demand (Bloom's Taxonomy level with confidence and reasoning), language load (reading level, sentence complexity, vocabulary variety), curriculum fit (vocabulary overlap with the chapter taught), and item quality (MCQ distractor plausibility, option similarity, longest-option giveaway). Handles a single item or a whole item bank in any format (JSON, CSV, spreadsheet, markdown, or pasted text). Use when asked to tag, classify, audit, measure, or report on exam/quiz items or questions - their thinking level, readability, curriculum alignment, or option balance.
 ---
 
 # Item Audit
 
-You audit assessment questions — individually or in bulk — across four layers, and report
+You audit assessment items — individually or in bulk — across four layers, and report
 what you measured.
 
 | id | Layer | What it measures | How |
@@ -13,10 +13,10 @@ what you measured.
 | `cog` | Cognitive demand | Bloom's Taxonomy level, confidence, reasoning | Your own judgment |
 | `lang` | Language load | Words, sentence complexity, vocabulary variety, readability | `scripts/audit.py` |
 | `fit` | Curriculum fit | Vocabulary overlap with the chapter taught | `scripts/audit.py` |
-| `item` | Item quality | Distractor plausibility, option similarity, longest option | `scripts/audit.py` |
+| `item` | Item quality | Whether the MCQ options work as good distractors: plausibility, option similarity, longest option | `scripts/audit.py` |
 
 The audit **measures and tags; it never says an item is good or bad**. Bands describe
-demand, not quality: a question with a heavy reading load is more demanding, not worse, and
+demand, not quality: an item with a heavy reading load is more demanding, not worse, and
 that may be exactly what the teacher wants. Report the numbers and the bands, and leave the
 verdict to the teacher.
 
@@ -26,18 +26,18 @@ second anchors the judgment calls. Read `references/metrics.md` before reporting
 non-Bloom's number — it has the framing rule in full, plus what every band means.
 
 Bloom's Taxonomy and the `lang`/`item` layers are curriculum-independent, so this skill
-works on questions from any curriculum with no profile. If the user's curriculum profile
+works on items from any curriculum with no profile. If the user's curriculum profile
 defines a different cognitive framework, say so and classify against Bloom's only if they
 confirm. The `fit` layer is the one that needs their material.
 
-**Calibration:** if the user supplies their own per-level example questions (e.g. from
-their curriculum profile or question bank), those override `references/level-examples.md`
+**Calibration:** if the user supplies their own per-level example items (e.g. from
+their curriculum profile or item bank), those override `references/level-examples.md`
 — match their conventions, not the defaults.
 
 ## When to use this skill
 
 - "What Bloom's level is this question?"
-- "Audit this exam paper." / "Audit this question bank."
+- "Audit this exam paper." / "Audit this item bank."
 - "Is this question too hard to read for Class 8?"
 - "Are the distractors in these MCQs any good?"
 - "Does this paper stick to the vocabulary in the chapter?"
@@ -46,15 +46,15 @@ their curriculum profile or question bank), those override `references/level-exa
 
 ## Inputs
 
-Questions in whatever form the user has them:
+Items in whatever form the user has them:
 
-- **A single question** — the question text, plus optionally: surrounding context/passage,
+- **A single item** — the item text, plus optionally: surrounding context/passage,
   MCQ option texts, the answer key, and the grade.
-- **A question bank in any format** — JSON (e.g. `{"questions": [...]}`), CSV or a
-  spreadsheet with a question column, a markdown/Word document, or questions pasted
+- **An item bank in any format** — JSON (e.g. `{"questions": [...]}`), CSV or a
+  spreadsheet with an item column, a markdown/Word document, or items pasted
   straight into the conversation. Don't ask the user to convert their file; work with what
   they have.
-- **The chapter** (optional) — the source material the questions come from. Only the `fit`
+- **The chapter** (optional) — the source material the items come from. Only the `fit`
   layer needs it.
 
 ### Choosing layers
@@ -66,8 +66,11 @@ Run all four unless the user asks for a subset ("just tag Bloom's levels" → `c
   question like "Do you have the chapter these come from? I can check vocabulary fit
   against it." If they don't have it or don't want to, skip `fit` and run the rest. Never
   substitute a guess or a general sense of "grade-appropriate vocabulary."
-- `item` needs 3+ options and an answer key. Non-MCQ items skip it; that's normal and not
-  worth commenting on unless the whole set skipped.
+- `item` needs 3+ options and an answer key, because today it only measures whether the
+  MCQ options work as good distractors. Non-MCQ items skip it; that's normal and not worth
+  commenting on unless the whole set skipped. Metrics for other item types (fill-in-the-
+  blank, short answer, long answer) are still to be added, so say "not yet measured for
+  this item type" rather than implying the item has no quality issues.
 - `lang`'s readability band needs a grade. Without one the script emits `band: "n"` and
   puts the bare score in the label; report it as a score with no judgment attached.
 
@@ -75,13 +78,13 @@ Run all four unless the user asks for a subset ("just tag Bloom's levels" → `c
 
 ### 1. Cognitive demand (`cog`) — your judgment
 
-1. Assemble the full question as you will read it:
+1. Assemble the full item as you will read it:
    - If there's a passage/context, put it first, labeled `Passage/Context:`.
-   - Then the question text.
+   - Then the item text.
    - Then each MCQ option on its own line, if provided.
 2. Classify per `references/blooms-taxonomy.md` — reason about the actual cognitive demand,
    don't just pattern-match a verb. "Explain" can be recall or analysis depending on the
-   question.
+   item.
 3. Produce the level, a confidence score, and one-line reasoning.
 
 If you genuinely cannot classify an item (empty or nonsensical text), say so rather than
@@ -133,7 +136,7 @@ estimates. Skip `fit` — it can't be eyeballed.
 
 ### 3. Report
 
-**Single question** — report each layer's bucket and the metrics behind it in prose or a
+**Single item** — report each layer's bucket and the metrics behind it in prose or a
 small table. When the caller is a pipeline (or asks for JSON), use exactly:
 
 ```json
@@ -151,10 +154,10 @@ small table. When the caller is a pipeline (or asks for JSON), use exactly:
 old Bloom's-only output keeps working. On failure:
 `{"status": "incomplete", "message": "...", "blooms_level": null}`.
 
-**Question bank** — write the results back **in the same format the input came in**,
+**Item bank** — write the results back **in the same format the input came in**,
 preserving every other field, column, row order, and piece of content:
 
-- **JSON**: set `bloom_level` and `bloom_confidence` on each question object, plus
+- **JSON**: set `bloom_level` and `bloom_confidence` on each item object, plus
   `audit` holding the `lang`/`fit`/`item` layers. Default output path inserts `_audited`
   before the extension (`bank.json` → `bank_audited.json`) unless the caller names one.
 - **CSV / spreadsheet**: add `bloom_level` and `bloom_confidence` columns, then one bucket
@@ -162,23 +165,23 @@ preserving every other field, column, row order, and piece of content:
   buckets — don't spray twelve metric columns across their sheet unless they ask for the
   detail. Same `_audited` naming default.
 - **Markdown/Word/pasted lists**: return the same document with the results noted per
-  question, or a compact table if in-place editing isn't practical.
+  item, or a compact table if in-place editing isn't practical.
 
-Skip any question that already carries a truthy Bloom's tag (`bloom_level` field, a filled
+Skip any item that already carries a truthy Bloom's tag (`bloom_level` field, a filled
 Bloom's column) — don't overwrite existing tags — but still run the measured layers on it.
-On failure, count it as an error and leave that question untouched.
+On failure, count it as an error and leave that item untouched.
 
 The counts refer to the Bloom's tag only, since that is the field you might overwrite:
-`tagged_count` is questions you newly classified, `skipped_count` is questions that
-already had a level, and `error_count` is questions you could not classify. Per-layer
+`tagged_count` is items you newly classified, `skipped_count` is items that already had
+a level, and `error_count` is items you could not classify. Per-layer
 coverage lives in `summary`, where each layer carries its own `skipped` count.
 
 Then report a **summary, not the full audited content** (it can be large): totals for
-tagged, skipped and errored questions, the bucket distribution per layer, and the output
+tagged, skipped and errored items, the bucket distribution per layer, and the output
 path. In JSON mode:
 
 ```json
-{"status": "completed", "total_questions": 40, "tagged_count": 38, "skipped_count": 1,
+{"status": "completed", "total_items": 40, "tagged_count": 38, "skipped_count": 1,
  "error_count": 1, "output_path": "...",
  "summary": {"cog":  {"buckets": {"Remembering": 12, "Understanding": 15}, "skipped": 1},
              "lang": {"buckets": {"Light": 20, "Moderate": 18}, "skipped": 0},
@@ -193,14 +196,14 @@ The script's own output already contains the `lang`/`fit`/`item` half of that su
 - Never fabricate a `blooms_level` value outside the six defined labels.
 - Never present an estimated number as a measured one. If the script ran, say so; if you
   estimated, say that instead.
-- A low curriculum-fit score is not an error. It often means the question deliberately
+- A low curriculum-fit score is not an error. It often means the item deliberately
   transfers a concept to an unfamiliar situation, which is what the higher Bloom's levels
   require. Report it as reach, not fault.
 - When the correct answer is the longest option, call that out specifically — it's the
   classic test-wiseness giveaway and the one thing an item writer will want to fix.
-- If a question's difficulty/marks make an unusual Bloom's level plausible (e.g. a 1-mark
-  question that's genuinely Analysing), trust your reasoning over an assumption that low
-  marks imply low cognitive level. The same goes across layers: a short question can carry
+- If an item's difficulty/marks make an unusual Bloom's level plausible (e.g. a 1-mark
+  item that's genuinely Analysing), trust your reasoning over an assumption that low
+  marks imply low cognitive level. The same goes across layers: a short item can carry
   high cognitive demand, and a long one can be pure recall. Don't let one layer's band
   talk you into another's.
 - If asked to *summarize* the distribution of a paper (e.g. "what percentage is just

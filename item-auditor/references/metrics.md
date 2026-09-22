@@ -11,7 +11,7 @@ yourself — see **Estimating without the script** at the end.
 ## The framing rule
 
 **The audit measures and tags. It never says an item is good or bad.** Bands describe
-*demand*, not quality: a "Heavy read" question is not a worse question, it is a more
+*demand*, not quality: a "Heavy read" item is not a worse item, it is a more
 demanding one, which may be exactly right for the class. Report the number and the band;
 leave the verdict to the teacher.
 
@@ -29,11 +29,11 @@ a report is scannable.
 ## Layer `lang` — Language load
 
 How hard the item is to *read*, independent of how hard it is to *think about*. Runs on
-every item. Computed over the question text (not the passage).
+every item. Computed over the item text (not the passage).
 
 | Metric | What it is | Bands |
 |---|---|---|
-| **Reading load** | Word count of the question | ≤10 Light read `g` · ≤29 Moderate read `n` · >29 Heavy read `a` |
+| **Reading load** | Word count of the item | ≤10 Light read `g` · ≤29 Moderate read `n` · >29 Heavy read `a` |
 | **Sentence complexity** | The most complex sentence in the item, 0–3 | 0 Simple `g` · 1 Compound `n` · 2 Complex `a` · 3 Compound-complex `a` |
 | **Vocabulary variety** | Type-Token Ratio: distinct words ÷ total words | ≤0.82 Repeated wording `g` · ≤0.95 Some variety `n` · >0.95 Highly varied `a` |
 | **Readability** | Flesch-Kincaid grade level | Within `grade + 1.5` → Around grade level `g` · above → Above grade level `a` |
@@ -84,14 +84,20 @@ compare against, so the layer does not run and reports why. Ask the user for the
 once; if they don't have it or don't want to supply it, skip `fit` and run the rest — do
 not substitute a guess.
 
-A low match is not a fault. It may mean the question deliberately transfers a concept to
+A low match is not a fault. It may mean the item deliberately transfers a concept to
 an unfamiliar situation, which is what the higher Bloom's levels require. Report it as
 reach, not error.
 
 ## Layer `item` — Item quality
 
-Structural balance of the options. **MCQ only** — needs 3+ options *and* an answer key.
-Without either, the layer reports why it was skipped.
+Whether the MCQ options work as good distractors: plausible enough to tempt a student who
+hasn't understood, distinct from one another, and none of them giving the answer away.
+**MCQ only** — needs 3+ options *and* an answer key. Without either, the layer reports why
+it was skipped.
+
+This is the one layer that does judge. A distractor nobody would ever pick, or a correct
+answer betrayed by its length, is a defect rather than a deliberate choice, so here a band
+of `a` means something is worth fixing.
 
 | Metric | What it is | Bands |
 |---|---|---|
@@ -108,6 +114,12 @@ answer risk more than one defensible answer.
 
 When the longest option *is* the correct answer, say so explicitly — that is the classic
 test-wiseness giveaway, and it's the case worth flagging to an item writer.
+
+**Other item types are not measured yet.** Fill-in-the-blank, short answer and long answer
+items skip this layer entirely, because every metric here compares one option against
+another. Quality metrics for those formats are still to be added. Until they are, report
+them as "not yet measured for this item type" rather than letting a skipped layer read as
+a clean bill of health.
 
 ## How the numbers are computed
 
