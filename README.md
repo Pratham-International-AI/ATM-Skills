@@ -5,8 +5,9 @@ normally need an experienced examiner:
 
 1. **Write exam questions** from a chapter: MCQs, fill-in-the-blanks, short answers, and
    long answers, each with a ready-to-use marking scheme.
-2. **Tag questions by thinking level** using Bloom's Taxonomy, so you can check whether a
-   paper actually tests understanding or is mostly rote recall.
+2. **Audit questions** across four measures: the thinking level they demand (Bloom's
+   Taxonomy), how hard they are to read, whether their vocabulary matches the chapter
+   taught, and whether MCQ options are balanced.
 
 The kit doesn't assume any particular board or syllabus. You describe your curriculum's
 rules in a document called a curriculum profile, and the AI follows those rules. A complete
@@ -23,7 +24,6 @@ review the results yourself before putting them in front of students.
 atm-skills/
   README.md                          ← you are here
   LICENSE                            ← Apache 2.0
-  NOTICE
   automatic-item-generation/         ← Skill 1: question generator
     SKILL.md
     curriculum-profiles/             ← the "describe your curriculum" part
@@ -38,11 +38,14 @@ atm-skills/
       item-writing-craft.md          ← question-quality rules that apply to any curriculum
       blooms-taxonomy.md
       output-schemas.md
-  blooms-taxonomy-classifier/        ← Skill 2: thinking-level tagger
+  item-auditor/                      ← Skill 2: question auditor
     SKILL.md
+    scripts/
+      audit.py                       ← measures reading load, fit, and option balance
     references/
       blooms-taxonomy.md
       level-examples.md              ← classified example questions per level
+      metrics.md                     ← what each measure means, and its bands
 ```
 
 The curriculum profiles live inside the generation skill on purpose: installing that one
@@ -99,6 +102,10 @@ the work. Some example requests:
 
 > "Audit this question paper. What percentage is just Remembering?"
 
+> "Is this Class 8 worksheet too hard to read for Class 8?"
+
+> "Check the MCQs in `paper.docx`. Are any of the distractors giveaways?"
+
 Every generated question comes with value points: the marking-scheme bullets an examiner
 ticks off when grading, structured the way your profile's marking rubric says.
 
@@ -117,32 +124,49 @@ questions come only from the chapter you supplied (no invented facts), each ques
 one concept, no two questions repeat the same idea, MCQ options are balanced so the correct
 answer doesn't stand out, and question depth matches the marks.
 
-One behavior worth knowing about: if you don't give it a profile and don't ask for the CBSE
-example, it stops and asks for one. It will not quietly invent rules for a curriculum it
-hasn't been given.
+One behavior worth knowing about: if you name a curriculum it has no profile for, it stops
+and asks for one rather than quietly inventing rules. (Say nothing about curriculum at all
+and it falls back to the bundled CBSE Class 10 example.)
 
-### Bloom's taxonomy classifier
+### Item auditor
 
 Give it a question, or a whole question bank in whatever format you keep it (JSON, CSV, a
-spreadsheet, or questions pasted into the chat), and it labels each question with one of
-the six Bloom's levels plus a confidence score and a one-line reason. For files, it hands
-back the same file with the levels filled in, for example a new Bloom's column added to
-your spreadsheet. It judges the actual thinking a question demands rather than trigger
-words; "explain" can be recall or analysis depending on the question.
+spreadsheet, or questions pasted into the chat), and it measures four things:
 
-Bloom's Taxonomy isn't tied to any curriculum, so this skill works without a profile.
+| Layer | What it tells you |
+|---|---|
+| Cognitive demand | The Bloom's level, with a confidence score and a one-line reason. It judges the actual thinking a question demands rather than trigger words; "explain" can be recall or analysis depending on the question. |
+| Language load | Word count, sentence complexity, vocabulary variety, and reading grade level, so you can catch a Class 6 question written in Class 10 English. |
+| Curriculum fit | How much of the question's vocabulary appears in the chapter you teach from. Needs you to supply the chapter; it asks once, and skips this measure if you'd rather not. |
+| Item quality | For MCQs with an answer key: whether the distractors are plausible, whether the options are too alike, and whether one option is a giveaway because it's conspicuously longer. |
+
+For files, it hands back a copy in the same format with the results filled in, for
+example new columns added to your spreadsheet. Your original is left untouched.
+
+The auditor measures, it doesn't grade. A question tagged "heavy read" is a more
+demanding question, which may be exactly what you intended. You get the numbers and what's
+typical for the grade; the judgment stays yours.
+
+The three measured layers run through a small Python script bundled with the skill. It
+uses only the standard library, so there is nothing to install. If you happen to have
+spaCy or textstat in your environment it uses those for more exact figures, and every
+result says which way it was computed. On a host with no code execution, the skill
+estimates what it can by hand and labels those numbers as estimates.
+
+Nothing here is tied to a curriculum except curriculum fit, which uses the chapter you
+supply, so this skill works without a profile.
 
 ## Setting it up
 
 ### Quick install (recommended)
 
 ```bash
-npx skills add <github-org>/atm-skills
+npx skills add Pratham-International-AI/ATM-Skills
 ```
 
-Replace `<github-org>` with the GitHub account this repo lives under. This installs both
-skills into agents that support the skills format (Claude Code, Codex, and others), and the
-curriculum profiles come along automatically because they sit inside the generation skill.
+This installs both skills into agents that support the skills format (Claude Code, Codex,
+and others), and the curriculum profiles come along automatically because they sit inside
+the generation skill.
 
 ### In Claude Code, manually
 
@@ -151,11 +175,11 @@ Copy the skill folders into your skills directory:
 ```bash
 # project-scoped (this project only)
 cp -r automatic-item-generation  /path/to/your/project/.claude/skills/
-cp -r blooms-taxonomy-classifier /path/to/your/project/.claude/skills/
+cp -r item-auditor              /path/to/your/project/.claude/skills/
 
 # or personal (all projects)
 cp -r automatic-item-generation  ~/.claude/skills/
-cp -r blooms-taxonomy-classifier ~/.claude/skills/
+cp -r item-auditor              ~/.claude/skills/
 ```
 
 Claude Code finds the skills automatically. Mention your profile (or "CBSE Class 10") in
@@ -165,7 +189,8 @@ your request and it takes it from there.
 
 Zip a skill folder so `SKILL.md` sits at the zip root, then upload the zip under Settings,
 then Skills. For the generation skill, `references/` and `curriculum-profiles/` travel
-inside the folder, so one zip carries everything.
+inside the folder, so one zip carries everything. Same for the auditor's `scripts/`: its
+measurement script runs wherever code execution is available.
 
 ### In ChatGPT (Custom GPT or Project)
 
@@ -175,6 +200,12 @@ inside the folder, so one zip carries everything.
 - ChatGPT Projects: same idea. `SKILL.md` body as project instructions, references and
   profile as project files.
 
+The auditor's `scripts/audit.py` needs code execution, which a Custom GPT has only if you
+enable Code Interpreter. Without it the skill still gives you the Bloom's level exactly,
+estimates language load and item quality by hand, and tells you which numbers are
+estimates. Upload `references/metrics.md` alongside the other reference files so it knows
+how.
+
 ### With any other LLM or API
 
 Everything is plain Markdown:
@@ -182,7 +213,11 @@ Everything is plain Markdown:
 1. Strip the YAML frontmatter from `SKILL.md` and use the rest as your system prompt.
 2. Give the model the `references/*.md` files and your curriculum profile, either pasted
    into the prompt, attached as files, or served via retrieval.
-3. Supply the inputs listed in `SKILL.md` under "Required inputs" in your user message.
+3. Supply the inputs the skill asks for in your user message (the generator lists them
+   under "Required inputs", the auditor under "Inputs").
+4. For the auditor, either give the model a way to run `scripts/audit.py` (it needs only
+   the Python standard library), or let it fall back to estimating. `references/metrics.md`
+   tells it how, and requires it to label estimates as such.
 
 ## Common questions
 
@@ -196,8 +231,9 @@ English only. To add a subject, write a new `<subject>-rules.md` in the profile 
 carefully, because the new subject hasn't been through our evaluations.
 
 **What if my curriculum doesn't use Bloom's Taxonomy?** Define your own levels in the
-profile's "Cognitive framework" section and the generator will use them. The standalone
-classifier skill, though, is Bloom's-only.
+profile's "Cognitive framework" section and the generator will use them. In the auditor,
+only the cognitive-demand layer is Bloom's-specific; language load, curriculum fit, and
+item quality don't depend on a cognitive framework at all, so you still get those three.
 
 **Who grades the answers?** This kit is for authoring only; it does not grade student
 answers or write feedback. Every question it generates comes with a marking scheme (the
@@ -205,4 +241,4 @@ value points), so an examiner, human or automated, has everything needed to grad
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Apache License 2.0. See [LICENSE](LICENSE).

@@ -6,7 +6,7 @@ carries to any curriculum.
 
 If classifications keep coming out wrong for your curriculum (different question phrasing
 conventions, different expectations per level), replace or extend these with 1-2 examples
-per level from your own question bank and tell the classifier to follow yours. Examples
+per level from your own question bank and tell the auditor to follow yours. Examples
 calibrate better than rules alone.
 
 ## Remembering
